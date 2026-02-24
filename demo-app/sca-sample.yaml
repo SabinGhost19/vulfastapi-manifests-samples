@@ -1,0 +1,23 @@
+apiVersion: devsecops.licenta.ro/v1
+kind: SupplyChainAttestation
+metadata:
+  name: global-security-policy
+spec:
+  sourceValidation:
+    enforceCosign: true
+    trustedIssuers:
+      - https://github.com/SabinGhost19/vulfastapi/.github/workflows/ci-cd.yaml@refs/heads/main
+  sbomPolicy:
+    enforceSBOM: true
+    forbiddenPackages:
+      - name: log4j
+        maxVersion: "2.15.0"
+  policyBinding:
+    enabled: true
+    requireAttestationType: https://devsecops.licenta.ro/attestations/custom-zta-policy/v1
+  strictManifestHash:
+    enabled: true
+    enforcementAction: Reject
+  runtimeEnforcement:
+    enabled: true
+    onPolicyDrift: Isolate
