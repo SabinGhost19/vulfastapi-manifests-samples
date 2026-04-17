@@ -14,3 +14,10 @@ spec:
     egressAllowedTo:
       - namespace: database
         ports: [5432]
+  wafConfig:
+    mode: Block
+    appProfile: REST-API
+  runtimeSecurity:
+    allowedPaths:
+      - /tmp/app-data
+    onCompromise: Isolate
