@@ -31,3 +31,22 @@ spec:
     enabled: true
     onPolicyDrift: Isolate
     onVulnerabilityFound: Alert
+  # CEL-based dynamic rules (new in v0.2). Each expression is evaluated
+  # against a uniform context: {voucher, image, zta, vex, sbom}.
+  # action semantics:
+  #   Deny  -> expression == true means violation (blocking).
+  #   Allow -> expression == false means required condition failed.
+  #   Alert -> expression == true emits Warning Event, non-blocking.
+  customRules:
+    - name: require-slsa-level-3
+      description: VBBI voucher must declare SLSA Build L3 or higher
+      expression: "voucher.build_context.slsa_level >= 3"
+      action: Allow
+    - name: deny-non-ghcr-images
+      description: Only images from the official GHCR registry are allowed
+      expression: "!image.startsWith('ghcr.io/')"
+      action: Deny
+    - name: alert-large-sbom
+      description: Surface a warning when SBOM exceeds 500 packages
+      expression: "size(sbom.packages) > 500"
+      action: Alert

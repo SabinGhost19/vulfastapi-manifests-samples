@@ -1,0 +1,53 @@
+# Variant of the SCA showcasing the new Audit (Alert) enforcement mode.
+# Apply this instead of sca-sample.yaml when you want to test a policy
+# change without breaking running workloads.
+#
+# Behaviour difference vs sca-sample.yaml:
+#   strictManifestHash.enforcementAction: Alert
+#     => when the manifest hash does NOT match expected_infra_hash, the
+#        operator emits a K8s Warning Event (reason=ManifestHashDrift)
+#        and sets status.securityState=Alert, but the Deployment is
+#        still created and traffic continues to flow.
+#
+# Once you have validated zero false-positives in production traffic,
+# switch enforcementAction back to "Reject" to enforce the policy.
+apiVersion: devsecops.licenta.ro/v1
+kind: SupplyChainAttestation
+metadata:
+  name: demo-app-security-policy
+spec:
+  sourceValidation:
+    enforceCosign: true
+    trustedIssuers:
+      - https://github.com/SabinGhost19/vulfastapi/.github/workflows/ci-cd.yaml@refs/heads/main
+  provenance:
+    requireVoucher: true
+    enforceHmacChain: true
+    minSlsaLevel: 3
+    trustedRepositories:
+      - SabinGhost19/vulfastapi
+  vulnerabilityPolicy:
+    maxAllowedSeverity: High
+    failOnFixable: true
+  sbomPolicy:
+    enforceSBOM: true
+    forbiddenPackages:
+      - name: log4j
+        maxVersion: "2.15.0"
+  policyBinding:
+    enabled: true
+    requireAttestationType: https://devsecops.licenta.ro/attestations/custom-zta-policy/v1
+  strictManifestHash:
+    enabled: true
+    enforcementAction: Alert      # <-- audit / dry-run mode
+  runtimeEnforcement:
+    enabled: true
+    onPolicyDrift: Alert            # <-- runtime drift only logs, no Isolate/Kill
+    onVulnerabilityFound: Alert
+  customRules:
+    - name: alert-when-vex-missing
+      description: |
+        If the image has no OpenVEX attestation, surface a Warning so the
+        team can either add justifications or accept the residual risk.
+      expression: "size(vex) == 0"
+      action: Alert
