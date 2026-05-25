@@ -27,6 +27,24 @@ spec:
   strictManifestHash:
     enabled: true
     enforcementAction: Reject
+  # SLSA v1.0 provenance attestation (predicate type
+  # https://slsa.dev/provenance/v1, cosign --type slsaprovenance1).
+  # Pipeline-ul folosește slsa-github-generator/generator_container_slsa3@v2.0.0,
+  # care setează builder.id = URL-ul workflow-ului generator.
+  # `allowedBuildTypes` este lăsat gol intenționat: valoarea buildType
+  # variază între minor versions ale generatorului (v0.1 / v1 / workflow/v1)
+  # și fac filtrul deja prin trustedBuilders (URL-ul e stabil).
+  slsaProvenancePolicy:
+    enforceSlsa: true
+    requiredLevel: 3
+    trustedBuilders:
+      - "https://github.com/slsa-framework/slsa-github-generator/.github/workflows/generator_container_slsa3.yml@refs/tags/v2.0.0"
+  # OpenVEX v0.2.0 signed attestation (predicate type
+  # https://openvex.dev/ns/v0.2.0). Independent of the Trivy-exemption
+  # path; this enforces that a signed OpenVEX statement document exists.
+  openVexPolicy:
+    enforceOpenVex: true
+    requireStatements: true
   runtimeEnforcement:
     enabled: true
     onPolicyDrift: Isolate
