@@ -29,14 +29,21 @@ spec:
     enforcementAction: Reject
   # SLSA v1.0 provenance attestation (predicate type
   # https://slsa.dev/provenance/v1, cosign --type slsaprovenance1).
-  # Pipeline-ul folosește slsa-github-generator/generator_container_slsa3@v2.0.0,
-  # care setează builder.id = URL-ul workflow-ului generator.
-  # `allowedBuildTypes` este lăsat gol intenționat: valoarea buildType
-  # variază între minor versions ale generatorului (v0.1 / v1 / workflow/v1)
-  # și fac filtrul deja prin trustedBuilders (URL-ul e stabil).
+  # Important: SLSA-ul este SEMNAT de reusable workflow-ul generator
+  # (slsa-framework/slsa-github-generator/...), NU de ci-cd.yaml-ul nostru.
+  # Deci certificate-identity verificat trebuie să fie URL-ul generator-ului,
+  # diferit de cel din sourceValidation.trustedIssuers.
   slsaProvenancePolicy:
     enforceSlsa: true
     requiredLevel: 3
+    # Identitățile keyless acceptate pentru semnătura SLSA atestării.
+    # Folosit de cosign --certificate-identity la verify-attestation.
+    trustedIssuers:
+      - "https://github.com/slsa-framework/slsa-github-generator/.github/workflows/generator_container_slsa3.yml@refs/tags/v2.0.0"
+    # trustedBuilders match-uiește predicate.runDetails.builder.id (în
+    # interiorul atestării). Aici e aceeași valoare ca trustedIssuers
+    # pentru că generator-ul v2.0.0 setează builder.id = workflow URL,
+    # dar conceptual sunt câmpuri ortogonale.
     trustedBuilders:
       - "https://github.com/slsa-framework/slsa-github-generator/.github/workflows/generator_container_slsa3.yml@refs/tags/v2.0.0"
   # OpenVEX v0.2.0 signed attestation (predicate type
