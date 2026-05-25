@@ -4,7 +4,7 @@ metadata:
   name: demo-api
   namespace: default
 spec:
-  image: ghcr.io/sabinghost19/demo-vulnerable-fastapi@sha256:f78058e562c219252a8240f3a7ea0a450f472e930589e35fe7c8674ac4881373
+  image: ghcr.io/sabinghost19/demo-vulnerable-fastapi@sha256:5a7e32f6b27e36e130479961f576de68d2113d98d518bcd09fc65beb1a310cfd
   replicas: 2
   securityPolicyRef:
     name: demo-app-security-policy
