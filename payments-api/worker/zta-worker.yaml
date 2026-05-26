@@ -4,7 +4,7 @@ metadata:
   name: payments-worker
   namespace: default
 spec:
-  image: ghcr.io/sabinghost19/payments-worker@sha256:dff1cefd8652a849fe3de5377ced2089aa805d23b5223bca9dbf5225d8eafe4d
+  image: ghcr.io/sabinghost19/payments-worker@sha256:bcceae35d2ac06804ed952bfaa2342202a1d3ce2e93ca1e6c122d0102be782df
   replicas: 2
   securityPolicyRef:
     name: payments-strict-policy
