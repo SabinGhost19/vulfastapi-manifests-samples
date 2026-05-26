@@ -1,0 +1,22 @@
+apiVersion: devsecops.licenta.ro/v1
+kind: ZeroTrustApplication
+metadata:
+  name: analytics-api
+  namespace: default
+spec:
+  image: ghcr.io/sabinghost19/analytics-api@sha256:0000000000000000000000000000000000000000000000000000000000000000
+  replicas: 2
+  securityPolicyRef:
+    name: analytics-relaxed-policy
+  networkZeroTrust:
+    ingressAllowedFrom:
+      - namespace: api-gateway
+    egressAllowedTo:
+      - namespace: kafka
+        ports: [9092]
+  runtimeSecurity:
+    allowedPaths:
+      - /tmp
+      - /var/run
+      - /app/cache
+    onCompromise: Isolate

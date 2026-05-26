@@ -1,0 +1,22 @@
+apiVersion: devsecops.licenta.ro/v1
+kind: ZeroTrustApplication
+metadata:
+  name: payments-worker
+  namespace: default
+spec:
+  image: ghcr.io/sabinghost19/payments-worker@sha256:0000000000000000000000000000000000000000000000000000000000000000
+  replicas: 2
+  securityPolicyRef:
+    name: payments-strict-policy
+  networkZeroTrust:
+    # Worker has no inbound; only outbound to DB + message queue.
+    egressAllowedTo:
+      - namespace: database
+        ports: [5432]
+      - namespace: kafka
+        ports: [9092]
+  runtimeSecurity:
+    allowedPaths:
+      - /tmp
+      - /var/run
+    onCompromise: Isolate

@@ -1,0 +1,44 @@
+apiVersion: devsecops.licenta.ro/v1
+kind: SupplyChainAttestation
+metadata:
+  name: analytics-strict-policy
+spec:
+  # Aceeași secțiune sourceValidation/provenance/slsa/openvex ca în relaxed.
+  sourceValidation:
+    enforceCosign: true
+    trustedIssuers:
+      - https://github.com/SabinGhost19/analytics-engine-demo/.github/workflows/ci-cd.yaml@refs/heads/main
+  provenance:
+    requireVoucher: true
+    enforceHmacChain: true
+    minSlsaLevel: 3
+    trustedRepositories:
+      - SabinGhost19/analytics-engine-demo
+  vulnerabilityPolicy:
+    maxAllowedSeverity: High
+    failOnFixable: true            # diferența cheie: blocăm fixable → Failed
+  sbomPolicy:
+    enforceSBOM: true
+  policyBinding:
+    enabled: true
+  strictManifestHash:
+    enabled: true
+    enforcementAction: Reject
+  slsaProvenancePolicy:
+    enforceSlsa: true
+    requiredLevel: 3
+    trustedIssuers:
+      - "https://github.com/slsa-framework/slsa-github-generator/.github/workflows/generator_container_slsa3.yml@refs/tags/v2.0.0"
+    trustedBuilders:
+      - "https://github.com/slsa-framework/slsa-github-generator/.github/workflows/generator_container_slsa3.yml@refs/tags/v2.0.0"
+  openVexPolicy:
+    enforceOpenVex: true
+    requireStatements: false
+  runtimeEnforcement:
+    enabled: true
+    onPolicyDrift: Isolate
+    onVulnerabilityFound: Kill     # Failed_SupplyChain pe analytics-worker
+  customRules:
+    - name: require-slsa-l3
+      expression: "voucher.build_context.slsa_level >= 3"
+      action: Allow

@@ -1,0 +1,52 @@
+apiVersion: devsecops.licenta.ro/v1
+kind: SupplyChainAttestation
+metadata:
+  name: payments-strict-policy
+spec:
+  sourceValidation:
+    enforceCosign: true
+    trustedIssuers:
+      - https://github.com/SabinGhost19/payments-api-demo/.github/workflows/ci-cd.yaml@refs/heads/main
+  provenance:
+    requireVoucher: true
+    enforceHmacChain: true
+    minSlsaLevel: 3
+    trustedRepositories:
+      - SabinGhost19/payments-api-demo
+  vulnerabilityPolicy:
+    maxAllowedSeverity: Medium      # mai strict decât demo-app (High)
+    failOnFixable: true
+  sbomPolicy:
+    enforceSBOM: true
+    forbiddenPackages:
+      - name: log4j
+        maxVersion: "2.15.0"
+  policyBinding:
+    enabled: true
+    requireAttestationType: https://devsecops.licenta.ro/attestations/custom-zta-policy/v1
+  strictManifestHash:
+    enabled: true
+    enforcementAction: Reject
+  slsaProvenancePolicy:
+    enforceSlsa: true
+    requiredLevel: 3
+    trustedIssuers:
+      - "https://github.com/slsa-framework/slsa-github-generator/.github/workflows/generator_container_slsa3.yml@refs/tags/v2.0.0"
+    trustedBuilders:
+      - "https://github.com/slsa-framework/slsa-github-generator/.github/workflows/generator_container_slsa3.yml@refs/tags/v2.0.0"
+  openVexPolicy:
+    enforceOpenVex: true
+    requireStatements: false
+  runtimeEnforcement:
+    enabled: true
+    onPolicyDrift: Isolate
+    onVulnerabilityFound: Kill      # fintech-grade: zero tolerance pentru fixable
+  customRules:
+    - name: deny-non-payments-images
+      description: Only images from the payments family are accepted
+      expression: "!image.startsWith('ghcr.io/sabinghost19/payments-')"
+      action: Deny
+    - name: require-slsa-l3
+      description: VBBI voucher must declare SLSA Build L3 or higher
+      expression: "voucher.build_context.slsa_level >= 3"
+      action: Allow

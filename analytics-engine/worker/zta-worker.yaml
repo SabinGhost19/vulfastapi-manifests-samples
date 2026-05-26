@@ -1,0 +1,21 @@
+apiVersion: devsecops.licenta.ro/v1
+kind: ZeroTrustApplication
+metadata:
+  name: analytics-worker
+  namespace: default
+spec:
+  image: ghcr.io/sabinghost19/analytics-worker@sha256:0000000000000000000000000000000000000000000000000000000000000000
+  replicas: 2
+  # Strict SCA → onVulnerabilityFound=Kill → Failed_SupplyChain.
+  # Worker include cryptography==41.0.0 cu CVE-uri fixable cunoscute.
+  securityPolicyRef:
+    name: analytics-strict-policy
+  networkZeroTrust:
+    egressAllowedTo:
+      - namespace: kafka
+        ports: [9092]
+  runtimeSecurity:
+    allowedPaths:
+      - /tmp
+      - /var/run
+    onCompromise: Isolate
