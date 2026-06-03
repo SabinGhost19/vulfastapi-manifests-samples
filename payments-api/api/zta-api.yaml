@@ -5,7 +5,7 @@ metadata:
   namespace: default
 spec:
   # Replaced by the bump-manifests CI job after each pipeline run.
-  image: ghcr.io/sabinghost19/payments-api@sha256:970ec06d89496bae1076f0c524ae30071adf33d4d6aa7ed43529232e61bfa51a
+  image: ghcr.io/sabinghost19/payments-api@sha256:51df037df38f00f86c1abd26f84c568c98e37d38424ebe9823806d865ceaa038
   replicas: 2
   securityPolicyRef:
     name: payments-strict-policy
