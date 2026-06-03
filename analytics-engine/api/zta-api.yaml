@@ -4,7 +4,7 @@ metadata:
   name: analytics-api
   namespace: default
 spec:
-  image: ghcr.io/sabinghost19/analytics-api@sha256:67c4847afb91cb84f84a7c1b15752da79fc4ec01303bc77401fbb901d616c822
+  image: ghcr.io/sabinghost19/analytics-api@sha256:a06c57d8f590cc2ce3fae43d7e7d767e845fac0832f0037ab33f9a38e29df01c
   replicas: 2
   securityPolicyRef:
     name: analytics-relaxed-policy

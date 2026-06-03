@@ -4,7 +4,7 @@ metadata:
   name: analytics-worker
   namespace: default
 spec:
-  image: ghcr.io/sabinghost19/analytics-worker@sha256:1657a765aa7b8c12c24c37d0ce7f2a881f65d6b0a413ffe334c2a576e7b672f6
+  image: ghcr.io/sabinghost19/analytics-worker@sha256:73a3b108ba8d7413e6f2162cc26130d7b729ed5dd138f673e495d67fd37daab7
   replicas: 2
   # Strict SCA → onVulnerabilityFound=Kill → Failed_SupplyChain.
   # Worker include cryptography==41.0.0 cu CVE-uri fixable cunoscute.
