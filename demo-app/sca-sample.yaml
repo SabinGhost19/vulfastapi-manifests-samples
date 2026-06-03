@@ -61,6 +61,16 @@ spec:
   openVexPolicy:
     enforceOpenVex: true
     requireStatements: true
+  # OSS security-scan attestation (gitleaks/checkov/semgrep -> security-scan/v1).
+  # requireAttestation:false keeps admission working on images built BEFORE the
+  # attestor existed; once CI re-runs and the image carries security-scan/v1,
+  # set it true to hard-require the signed scan.
+  securityScanPolicy:
+    enforceSecurityScan: true
+    requireAttestation: false
+    failOnSecrets: true
+    maxIacSeverity: High
+    maxSastSeverity: High
   runtimeEnforcement:
     enabled: true
     onPolicyDrift: Isolate

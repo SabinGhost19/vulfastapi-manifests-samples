@@ -39,6 +39,14 @@ spec:
   openVexPolicy:
     enforceOpenVex: true
     requireStatements: false
+  # OSS security-scan attestation (gitleaks/checkov/semgrep -> security-scan/v1).
+  # relaxed variant: secrets still block, IaC/SAST only block at Critical.
+  securityScanPolicy:
+    enforceSecurityScan: true
+    requireAttestation: false
+    failOnSecrets: true
+    maxIacSeverity: Critical
+    maxSastSeverity: Critical
   runtimeEnforcement:
     enabled: true
     onPolicyDrift: Alert
