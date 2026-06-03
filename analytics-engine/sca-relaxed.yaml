@@ -5,8 +5,14 @@ metadata:
 spec:
   sourceValidation:
     enforceCosign: true
+    # Pipeline split into per-job reusable workflows: cosign keyless SAN is now
+    # the job-*.yml that signs. The operator loops over this list (OR), so both
+    # new identities are listed (attestations + image signature).
     trustedIssuers:
-      - https://github.com/SabinGhost19/analytics-engine-demo/.github/workflows/ci-cd.yaml@refs/heads/main
+      - https://github.com/SabinGhost19/analytics-engine-demo/.github/workflows/job-attestations.yml@refs/heads/main
+      - https://github.com/SabinGhost19/analytics-engine-demo/.github/workflows/job-sign.yml@refs/heads/main
+      # Legacy monolithic identity (unused once the split pipeline has run):
+      # - https://github.com/SabinGhost19/analytics-engine-demo/.github/workflows/ci-cd.yaml@refs/heads/main
   provenance:
     requireVoucher: true
     enforceHmacChain: true

@@ -1,0 +1,13 @@
+# Manifests-only repo. Keep it clean of OS/editor cruft and any transient
+# checkout artifacts the pipeline might create locally.
+
+# ---- transient checkout / build dirs (pipeline-side) ----
+manifests-repo/
+manifests-source/
+
+# ---- OS / editors ----
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
