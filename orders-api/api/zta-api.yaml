@@ -5,7 +5,7 @@ metadata:
   namespace: default
 spec:
   # Placeholder digest — replaced by the bump-manifests CI job after each run.
-  image: ghcr.io/sabinghost19/orders-api@sha256:0000000000000000000000000000000000000000000000000000000000000000
+  image: ghcr.io/sabinghost19/orders-api@sha256:a2540b9d20159c761157beced87914a6fd46303f72c3e3c93306dfc870e29e5b
   replicas: 2
   securityPolicyRef:
     name: orders-verified-policy
