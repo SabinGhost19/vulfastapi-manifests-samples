@@ -1,0 +1,70 @@
+apiVersion: devsecops.licenta.ro/v1
+kind: SupplyChainAttestation
+metadata:
+  name: orders-verified-policy
+spec:
+  sourceValidation:
+    enforceCosign: true
+    # Pipeline split into per-job reusable workflows: cosign keyless SAN is the
+    # job-*.yml that signs. The operator loops over this list (OR), so both
+    # identities are listed (attestations + image signature).
+    trustedIssuers:
+      - https://github.com/SabinGhost19/orders-api-demo/.github/workflows/job-attestations.yml@refs/heads/main
+      - https://github.com/SabinGhost19/orders-api-demo/.github/workflows/job-sign.yml@refs/heads/main
+  provenance:
+    requireVoucher: true
+    enforceHmacChain: true
+    minSlsaLevel: 3
+    trustedRepositories:
+      - SabinGhost19/orders-api-demo
+  vulnerabilityPolicy:
+    # GUAC-correlation demo: this app SHARES vulnerable pip packages with
+    # analytics-worker / demo-app (cryptography==41.0.0 -> CVE-2023-50782, etc.)
+    # so the Blast Radius graph links them. Tolerant (Critical ceiling, fixable
+    # allowed, Alert not Kill) so the app still DEPLOYS despite those CVEs and
+    # surfaces live deployment nodes in the graph. Strict blocking is the job of
+    # payments-strict-policy, not this one.
+    maxAllowedSeverity: Critical
+    failOnFixable: false
+  sbomPolicy:
+    enforceSBOM: true
+    forbiddenPackages:
+      - name: log4j
+        maxVersion: "2.15.0"
+  policyBinding:
+    enabled: true
+    requireAttestationType: https://devsecops.licenta.ro/attestations/custom-zta-policy/v1
+  strictManifestHash:
+    enabled: true
+    enforcementAction: Reject
+  slsaProvenancePolicy:
+    enforceSlsa: true
+    requiredLevel: 3
+    trustedIssuers:
+      - "https://github.com/slsa-framework/slsa-github-generator/.github/workflows/generator_container_slsa3.yml@refs/tags/v2.0.0"
+    trustedBuilders:
+      - "https://github.com/slsa-framework/slsa-github-generator/.github/workflows/generator_container_slsa3.yml@refs/tags/v2.0.0"
+  openVexPolicy:
+    enforceOpenVex: true
+    requireStatements: false
+  # OSS security-scan attestation (gitleaks/checkov/semgrep -> security-scan/v1).
+  # requireAttestation:false until CI re-runs with the attestor; flip to true after.
+  securityScanPolicy:
+    enforceSecurityScan: true
+    requireAttestation: false
+    failOnSecrets: true
+    maxIacSeverity: High
+    maxSastSeverity: High
+  runtimeEnforcement:
+    enabled: true
+    onPolicyDrift: Isolate
+    onVulnerabilityFound: Alert    # Verified happy-path demo: warn, don't kill.
+  customRules:
+    - name: deny-non-orders-images
+      description: Only images from the orders family are accepted
+      expression: "!image.startsWith('ghcr.io/sabinghost19/orders-')"
+      action: Deny
+    - name: require-slsa-l3
+      description: VBBI voucher must declare SLSA Build L3 or higher
+      expression: "voucher.build_context.slsa_level >= 3"
+      action: Allow

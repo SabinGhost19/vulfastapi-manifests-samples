@@ -1,0 +1,22 @@
+apiVersion: devsecops.licenta.ro/v1
+kind: ZeroTrustApplication
+metadata:
+  name: orders-api
+  namespace: default
+spec:
+  # Placeholder digest — replaced by the bump-manifests CI job after each run.
+  image: ghcr.io/sabinghost19/orders-api@sha256:0000000000000000000000000000000000000000000000000000000000000000
+  replicas: 2
+  securityPolicyRef:
+    name: orders-verified-policy
+  networkZeroTrust:
+    ingressAllowedFrom:
+      - namespace: api-gateway
+    egressAllowedTo:
+      - namespace: database
+        ports: [5432]
+  runtimeSecurity:
+    allowedPaths:
+      - /tmp
+      - /var/run
+    onCompromise: Isolate

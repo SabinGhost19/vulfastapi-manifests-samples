@@ -1,0 +1,46 @@
+# Headline of the orders-api demo: Vault secret injection GATED on the supply
+# chain being Verified. `zeroTrustConditions.requireVerifiedStatus: true` means
+# the operator only materializes this secret (and injects DB_USERNAME/DB_PASSWORD
+# into the orders-api Deployment) once the matching ZeroTrustApplication reaches
+# trustLevel=Verified. The api logs "DB_USERNAME present=true" only after that —
+# the observable proof that attestation gating works end-to-end.
+#
+# Kept at the orders-api/ subpath ROOT (not under api/) so it is excluded from the
+# per-service expected_infra_hash and untouched by the bump-manifests CI job.
+apiVersion: devsecops.licenta.ro/v1
+kind: ZeroTrustSecret
+metadata:
+  name: orders-api-db-secret
+  namespace: default
+spec:
+  applicationRef:
+    name: orders-api
+    namespace: default
+  targetWorkload:
+    kind: Deployment
+    name: orders-api
+    namespace: default
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: vault-backend
+  targetSecretName: orders-api-db-secret
+  secretData:
+    remotePath: secret/data/prod/orders-api/config
+    mapping:
+      - remoteKey: username
+        localKey: DB_USERNAME
+        type: EnvVar
+      - remoteKey: password
+        localKey: DB_PASSWORD
+        type: EnvVar
+      - remoteKey: password
+        localKey: db-password
+        type: VolumeMount
+        mountPath: /var/run/secrets/orders-db/
+  zeroTrustConditions:
+    requireVerifiedStatus: true
+    timeBasedAccess:
+      enabled: false
+  lifecycle:
+    refreshInterval: 1m
+    onUpdateAction: RollingRestart

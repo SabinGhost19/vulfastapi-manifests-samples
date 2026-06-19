@@ -1,0 +1,23 @@
+apiVersion: devsecops.licenta.ro/v1
+kind: ZeroTrustApplication
+metadata:
+  name: orders-worker
+  namespace: default
+spec:
+  # Placeholder digest — replaced by the bump-manifests CI job after each run.
+  image: ghcr.io/sabinghost19/orders-worker@sha256:0000000000000000000000000000000000000000000000000000000000000000
+  replicas: 2
+  securityPolicyRef:
+    name: orders-verified-policy
+  networkZeroTrust:
+    # Worker has no inbound; only outbound to DB + message queue.
+    egressAllowedTo:
+      - namespace: database
+        ports: [5432]
+      - namespace: kafka
+        ports: [9092]
+  runtimeSecurity:
+    allowedPaths:
+      - /tmp
+      - /var/run
+    onCompromise: Isolate
