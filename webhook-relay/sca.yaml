@@ -1,0 +1,64 @@
+apiVersion: devsecops.licenta.ro/v1
+kind: SupplyChainAttestation
+metadata:
+  name: webhook-relay-policy
+spec:
+  sourceValidation:
+    enforceCosign: true
+    # cosign keyless SAN is the job-*.yml that signs (the operator ORs the list).
+    trustedIssuers:
+      - https://github.com/SabinGhost19/webhook-relay-demo/.github/workflows/job-attestations.yml@refs/heads/main
+      - https://github.com/SabinGhost19/webhook-relay-demo/.github/workflows/job-sign.yml@refs/heads/main
+  provenance:
+    requireVoucher: true
+    enforceHmacChain: true
+    minSlsaLevel: 3
+    trustedRepositories:
+      - SabinGhost19/webhook-relay-demo
+  vulnerabilityPolicy:
+    # Clean distroless Node image (only express in prod) → ~0 CVEs, so this admits
+    # as Verified. The story for this app is RUNTIME drift, not the supply chain.
+    maxAllowedSeverity: High
+    failOnFixable: false
+  sbomPolicy:
+    enforceSBOM: true
+    forbiddenPackages:
+      - name: log4j
+        maxVersion: "2.15.0"
+  policyBinding:
+    enabled: true
+    requireAttestationType: https://devsecops.licenta.ro/attestations/custom-zta-policy/v1
+  strictManifestHash:
+    enabled: true
+    enforcementAction: Reject
+  slsaProvenancePolicy:
+    enforceSlsa: true
+    requiredLevel: 3
+    trustedIssuers:
+      - "https://github.com/slsa-framework/slsa-github-generator/.github/workflows/generator_container_slsa3.yml@refs/tags/v2.0.0"
+    trustedBuilders:
+      - "https://github.com/slsa-framework/slsa-github-generator/.github/workflows/generator_container_slsa3.yml@refs/tags/v2.0.0"
+  openVexPolicy:
+    enforceOpenVex: true
+    requireStatements: false
+  securityScanPolicy:
+    enforceSecurityScan: true
+    requireAttestation: false
+    failOnSecrets: true
+    maxIacSeverity: High
+    maxSastSeverity: High
+  # Runtime enforcement — the part this app actually exercises end-to-end:
+  # writes outside allowedPaths are detected by Falco and acted on by Talon.
+  runtimeEnforcement:
+    enabled: true
+    onPolicyDrift: Isolate
+    onVulnerabilityFound: Alert
+  customRules:
+    - name: deny-non-webhook-relay-images
+      description: Only images from the webhook-relay family are accepted
+      expression: "!image.startsWith('ghcr.io/sabinghost19/webhook-relay')"
+      action: Deny
+    - name: require-slsa-l3
+      description: VBBI voucher must declare SLSA Build L3 or higher
+      expression: "voucher.build_context.slsa_level >= 3"
+      action: Allow

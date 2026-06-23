@@ -1,0 +1,25 @@
+apiVersion: devsecops.licenta.ro/v1
+kind: ZeroTrustApplication
+metadata:
+  name: webhook-relay
+  namespace: default
+spec:
+  # Placeholder digest — replaced by the bump-manifests CI job after each run.
+  image: ghcr.io/sabinghost19/webhook-relay@sha256:0000000000000000000000000000000000000000000000000000000000000000
+  replicas: 1
+  securityPolicyRef:
+    name: webhook-relay-policy
+  networkZeroTrust:
+    ingressAllowedFrom:
+      - namespace: api-gateway
+    egressAllowedTo:
+      - namespace: observability
+        ports: [4317]
+  # The runtime-drift showcase: allowedPaths is intentionally narrow (/tmp only),
+  # so the /debug/drift write to /app trips the operator's per-app Falco rule
+  # (Unauthorized_Write_default_webhook_relay) and Falco Talon isolates the pod.
+  # The operator also sets readOnlyRootFilesystem and mounts /tmp as an emptyDir.
+  runtimeSecurity:
+    allowedPaths:
+      - /tmp
+    onCompromise: Isolate   # deny-all NetworkPolicy via Talon (Kill = delete pod)
