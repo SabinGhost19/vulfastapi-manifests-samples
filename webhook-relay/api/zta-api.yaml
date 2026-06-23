@@ -5,7 +5,7 @@ metadata:
   namespace: default
 spec:
   # Placeholder digest — replaced by the bump-manifests CI job after each run.
-  image: ghcr.io/sabinghost19/webhook-relay@sha256:0000000000000000000000000000000000000000000000000000000000000000
+  image: ghcr.io/sabinghost19/webhook-relay@sha256:64acb13627b387f2df6a9e0a0e49c854454f754d1a2b950d187f2254e5fd3b82
   replicas: 1
   securityPolicyRef:
     name: webhook-relay-policy
@@ -22,4 +22,4 @@ spec:
   runtimeSecurity:
     allowedPaths:
       - /tmp
-    onCompromise: Isolate   # deny-all NetworkPolicy via Talon (Kill = delete pod)
+    onCompromise: Isolate # deny-all NetworkPolicy via Talon (Kill = delete pod)
