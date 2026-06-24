@@ -11,7 +11,7 @@ spec:
   secretStoreRef:
     kind: ClusterSecretStore
     name: vault-backend
-  targetSecretName: demo-api-db-secret
+  targetSecretName: demo-api-zts-secret-simple
   secretData:
     remotePath: prod/demo-api/config
     mapping:
